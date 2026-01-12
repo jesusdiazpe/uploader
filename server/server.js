@@ -53,29 +53,68 @@ app.post("/upload", upload.single("image"), (req, res) => {
 // Página para ver
 app.get("/i/:t", (req, res) => {
   if (!current || req.params.t !== current.viewToken) {
-    return res.status(404).send("Imagen no encontrada (o fue reemplazada/borrada).");
+    return res.status(404).send("Imagen no encontrada.");
   }
 
   res.type("html").send(`<!doctype html>
-<html lang="es"><head>
-<meta charset="utf-8" />
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Imagen</title>
 <style>
-body{margin:0;background:#0b0b0b;color:#fff;font-family:system-ui}
-.wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
-.card{width:min(900px,96vw);background:#141414;border-radius:16px;padding:16px}
-img{width:100%;height:auto;display:block;border-radius:12px;user-select:none;-webkit-user-drag:none}
+body { margin:0; background:#0b0b0b; color:#fff; font-family:system-ui }
+.wrap { min-height:100vh; display:grid; place-items:center; padding:24px }
+.card { width:min(900px,96vw); background:#141414; border-radius:16px; padding:16px }
+img { width:100%; height:auto; display:block; border-radius:12px }
+.hidden { display:none }
+.msg { text-align:center; opacity:.8 }
 </style>
-</head><body>
-<div class="wrap"><div class="card">
-<img src="/raw/${current.viewToken}" draggable="false"/>
-</div></div>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <img id="img" src="/raw/${current.viewToken}" />
+    <div id="msg" class="msg hidden">
+      Imagen eliminada o reemplazada.
+    </div>
+  </div>
+</div>
+
 <script>
-document.addEventListener("contextmenu", e=>e.preventDefault());
-document.addEventListener("dragstart", e=>e.preventDefault());
+  // Bloqueos UX
+  document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("dragstart", e => e.preventDefault());
+
+  const img = document.getElementById("img");
+  const msg = document.getElementById("msg");
+
+  // 1️⃣ Polling: verifica si la imagen sigue existiendo
+  async function check() {
+    try {
+      const r = await fetch("/raw/${current.viewToken}", { method: "HEAD", cache: "no-store" });
+      if (!r.ok) throw new Error();
+    } catch {
+      img.classList.add("hidden");
+      msg.classList.remove("hidden");
+      clearInterval(timer);
+    }
+  }
+
+  const timer = setInterval(check, 1200);
+
+  // 2️⃣ BroadcastChannel: refresco inmediato al borrar
+  const bc = new BroadcastChannel("uploader");
+  bc.onmessage = (e) => {
+    if (e.data?.type === "deleted" && e.data.token === "${current.viewToken}") {
+      img.classList.add("hidden");
+      msg.classList.remove("hidden");
+      clearInterval(timer);
+    }
+  };
 </script>
-</body></html>`);
+</body>
+</html>`);
 });
 
 // Bytes de imagen (RAM)
@@ -92,10 +131,30 @@ app.get("/raw/:t", (req, res) => {
 // Link para borrar (clic)
 app.get("/delete/:dt", (req, res) => {
   if (!current) return res.status(404).send("No hay imagen activa.");
-  if (req.params.dt !== current.deleteToken) return res.status(403).send("No autorizado.");
+  if (req.params.dt !== current.deleteToken) {
+    return res.status(403).send("No autorizado.");
+  }
 
+  const deletedToken = current.viewToken;
   current = null;
-  res.type("html").send(`<h3>empty</h3>`);
+
+  res.type("html").send(`<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>Imagen borrada</title>
+</head>
+<body>
+<h3>Imagen borrada ✅</h3>
+<p>Puedes cerrar esta pestaña.</p>
+
+<script>
+  // Notifica a las pestañas abiertas del visor
+  const bc = new BroadcastChannel("uploader");
+  bc.postMessage({ type: "deleted", token: "${deletedToken}" });
+</script>
+</body>
+</html>`);
 });
 
 // Render usa el puerto en process.env.PORT
