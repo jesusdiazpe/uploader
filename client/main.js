@@ -1,3 +1,5 @@
+import "./src/style.css";
+
 // Local: tu backend corre en 3001
 // En Render: lo pondrás con un env var VITE_API_BASE
 const API = import.meta.env.VITE_API_BASE || "http://localhost:3001";

@@ -1,14 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uploader</title>
+</head>
 <body>
-  <div style="max-width:680px;margin:40px auto;font-family:system-ui">
+  <div id="app">
     <h2>Subir 1 imagen y compartir link</h2>
 
     <input id="file" type="file" accept="image/*" />
-    <div style="margin-top:12px;display:flex;gap:8px">
+    <div class="btn-row">
       <button id="upload">Subir</button>
     </div>
 
-    <div id="out" style="margin-top:16px"></div>
+    <div id="out"></div>
   </div>
 
   <script type="module" src="/main.js"></script>
 </body>
+</html>
