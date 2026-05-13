@@ -42,7 +42,11 @@ uploadBtn.onclick = async () => {
     deleteBtn.textContent = "Eliminando...";
 
     try {
-      const deleteRes = await fetch(data.deleteUrl, { method: "GET" });
+      const deletePath = new URL(data.deleteUrl).pathname;
+      const deleteRes = await fetch(`${API}${deletePath}`, {
+        method: "GET",
+        credentials: "omit",
+      });
 
       if (!deleteRes.ok) {
         deleteBtn.disabled = false;
