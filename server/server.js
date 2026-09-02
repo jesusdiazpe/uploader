@@ -96,6 +96,17 @@ img, video { width:100%; height:auto; display:block; border-radius:12px }
   const media = document.getElementById("media");
   const msg = document.getElementById("msg");
 
+  // Mantiene el audio desactivado incluso si se intenta usar el control de volumen.
+  if (media.tagName === "VIDEO") {
+    const enforceMute = () => {
+      media.defaultMuted = true;
+      media.muted = true;
+      media.volume = 0;
+    };
+    media.addEventListener("volumechange", enforceMute);
+    enforceMute();
+  }
+
   // 1️⃣ Polling: verifica si el archivo sigue existiendo
   async function check() {
     try {
