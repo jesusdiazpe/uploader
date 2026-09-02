@@ -27,15 +27,15 @@ uploadBtn.onclick = async () => {
 
   out.innerHTML = `
     <p id="view-link"><b>Link para ver:</b> <a target="_blank" href="${data.viewUrl}">${data.viewUrl}</a></p>
-    <p><b>Eliminar imagen:</b> <button id="delete-image" type="button">Eliminar</button></p>
-    <p style="opacity:.7;font-size:13px">Solo existe 1 imagen activa. Si subes otra, se reemplaza.</p>
+    <p><b>Eliminar archivo:</b> <button id="delete-image" type="button">Eliminar</button></p>
+    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. El límite es de 8 MB.</p>
   `;
 
   const deleteBtn = document.querySelector("#delete-image");
   const viewLink = document.querySelector("#view-link");
 
   deleteBtn?.addEventListener("click", async () => {
-    const confirmed = window.confirm("¿Seguro que quieres eliminar la imagen?");
+    const confirmed = window.confirm("¿Seguro que quieres eliminar el archivo?");
     if (!confirmed) return;
 
     deleteBtn.disabled = true;
@@ -51,20 +51,20 @@ uploadBtn.onclick = async () => {
       if (!deleteRes.ok) {
         deleteBtn.disabled = false;
         deleteBtn.textContent = "Eliminar";
-        out.textContent = "No se pudo eliminar la imagen.";
+        out.textContent = "No se pudo eliminar el archivo.";
         return;
       }
 
       viewLink?.remove();
       out.innerHTML = `
-        <p>Imagen eliminada.</p>
+        <p>Archivo eliminado.</p>
         <p style="opacity:.7;font-size:13px">Ya no hay una imagen activa.</p>
       `;
       fileInput.value = "";
     } catch {
       deleteBtn.disabled = false;
       deleteBtn.textContent = "Eliminar";
-      out.textContent = "No se pudo eliminar la imagen.";
+      out.textContent = "No se pudo eliminar el archivo.";
     }
   });
 };
