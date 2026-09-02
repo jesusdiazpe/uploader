@@ -60,7 +60,7 @@ app.get("/i/:t", (req, res) => {
 
   const isVideo = current.mime.startsWith("video/");
   const media = isVideo
-    ? `<video id="media" controls controlslist="nodownload" playsinline preload="metadata" src="/raw/${current.viewToken}"></video>`
+    ? `<video id="media" controls controlslist="nodownload" playsinline preload="metadata" muted src="/raw/${current.viewToken}"></video>`
     : `<img id="media" src="/raw/${current.viewToken}" />`;
 
   res.type("html").send(`<!doctype html>
