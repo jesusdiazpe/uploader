@@ -58,7 +58,7 @@ uploadBtn.onclick = async () => {
       viewLink?.remove();
       out.innerHTML = `
         <p>Archivo eliminado.</p>
-        <p style="opacity:.7;font-size:13px">Ya no hay una imagen activa.</p>
+        <p style="opacity:.7;font-size:13px">Ya no hay un archivo activo.</p>
       `;
       fileInput.value = "";
     } catch {
