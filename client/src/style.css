@@ -93,3 +93,58 @@ button:focus-visible {
 #out {
   margin-top: 16px;
 }
+
+.dropzone {
+  margin-top: 16px;
+  border: 2px dashed #646cff;
+  border-radius: 12px;
+  padding: 2.5em 1em;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  background-color: #2a2a2e;
+  border-color: #535bf2;
+}
+
+.dropzone p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.95em;
+}
+
+.progress-wrap {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-wrap.hidden {
+  display: none;
+}
+
+.progress-bar-track {
+  flex: 1;
+  background: #2e2e2e;
+  border-radius: 8px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #646cff;
+  border-radius: 8px;
+  transition: width 0.15s ease;
+}
+
+.progress-label {
+  font-size: 0.85em;
+  opacity: 0.8;
+  min-width: 3em;
+  text-align: right;
+}

@@ -9,12 +9,23 @@
   <div id="app">
     <h2>Subir 1 imagen o video y compartir link</h2>
 
-    <input id="file" type="file" accept="image/*,video/*" />
-    <div class="btn-row">
-      <button id="upload">Subir</button>
+    <div id="dropzone" class="dropzone">
+      <input id="file" type="file" accept="image/*,video/*" hidden />
+      <p id="dropzone-text">Arrastra una imagen o video aquí, o haz clic para elegir</p>
     </div>
 
-    <div id="out"></div>test
+    <div class="btn-row">
+      <button id="upload" disabled>Subir</button>
+    </div>
+
+    <div id="progress-wrap" class="progress-wrap hidden">
+      <div class="progress-bar-track">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <span id="progress-label" class="progress-label">0%</span>
+    </div>
+
+    <div id="out"></div>
   </div>
 
   <script type="module" src="/main.js"></script>
