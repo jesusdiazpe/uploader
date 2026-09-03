@@ -95,7 +95,10 @@ uploadBtn.onclick = async () => {
   if (!file) return;
 
   uploadBtn.disabled = true;
-  out.textContent = "Subiendo...";
+  const willCompress = file.type?.startsWith("video/") && file.size > 10 * 1024 * 1024;
+  out.textContent = willCompress
+    ? "Subiendo... El video se comprimirá en el servidor (puede tardar un poco)."
+    : "Subiendo...";
   progressWrap.classList.remove("hidden");
   progressBar.style.width = "0%";
   progressLabel.textContent = "0%";
@@ -118,7 +121,7 @@ uploadBtn.onclick = async () => {
   out.innerHTML = `
     <p id="view-link"><b>Link para ver:</b> <a target="_blank" href="${data.viewUrl}">${data.viewUrl}</a></p>
     <p><b>Eliminar archivo:</b> <button id="delete-image" type="button">Eliminar</button></p>
-    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. El límite es de 8 MB.</p>
+    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. Imágenes de hasta 8 MB; los videos de más de 10 MB se comprimen automáticamente.</p>
   `;
 
   const deleteBtn = document.querySelector("#delete-image");

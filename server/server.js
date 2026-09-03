@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import crypto from "crypto";
+import { compressVideo, COMPRESS_THRESHOLD_BYTES } from "./compress.js";
 
 const app = express();
 
@@ -11,7 +12,8 @@ app.use(cors({ origin: allowedOrigin }));
 
 const upload = multer({
   storage: multer.memoryStorage(), // SOLO RAM
-  limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
+  // Los videos >10MB se comprimen después, así que se aceptan archivos más grandes.
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype?.startsWith("image/") && !file.mimetype?.startsWith("video/")) {
       return cb(new Error("Solo imágenes o videos"));
@@ -30,26 +32,48 @@ let current = null;
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-app.post("/upload", upload.single("image"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No se recibió archivo" });
+app.post("/upload", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No se recibió archivo" });
 
-  const viewToken = token(18);
-  const deleteToken = token(24);
+    let mime = req.file.mimetype;
+    let buffer = req.file.buffer;
 
-  current = {
-    viewToken,
-    deleteToken,
-    mime: req.file.mimetype,
-    buffer: req.file.buffer,
-    createdAt: new Date().toISOString(),
-  };
+    const isVideo = mime.startsWith("video/");
+    if (!isVideo && buffer.length > 8 * 1024 * 1024) {
+      return res.status(400).json({ error: "La imagen supera el límite de 8 MB" });
+    }
+    if (isVideo && buffer.length > COMPRESS_THRESHOLD_BYTES) {
+      try {
+        buffer = await compressVideo(buffer);
+        mime = "video/mp4";
+      } catch (err) {
+        console.error("Error al comprimir video:", err.message);
+        return res.status(422).json({ error: err.message });
+      }
+    }
 
-  const base = `${req.protocol}://${req.get("host")}`;
+    const viewToken = token(18);
+    const deleteToken = token(24);
 
-  res.json({
-    viewUrl: `${base}/i/${viewToken}`,
-    deleteUrl: `${base}/delete/${deleteToken}`,
-  });
+    current = {
+      viewToken,
+      deleteToken,
+      mime,
+      buffer,
+      createdAt: new Date().toISOString(),
+    };
+
+    const base = `${req.protocol}://${req.get("host")}`;
+
+    res.json({
+      viewUrl: `${base}/i/${viewToken}`,
+      deleteUrl: `${base}/delete/${deleteToken}`,
+    });
+  } catch (err) {
+    console.error("Error en /upload:", err);
+    res.status(500).json({ error: "Error al procesar el archivo" });
+  }
 });
 
 // Página para ver
@@ -173,6 +197,15 @@ app.get("/delete/:dt", (req, res) => {
 </script>
 </body>
 </html>`);
+});
+
+// Errores de multer (p. ej. archivo demasiado grande) y demás errores no capturados
+app.use((err, _req, res, _next) => {
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ error: "El archivo supera el tamaño máximo permitido (500 MB)" });
+  }
+  console.error("Error:", err);
+  res.status(400).json({ error: err?.message || "Error en la petición" });
 });
 
 // Render usa el puerto en process.env.PORT
