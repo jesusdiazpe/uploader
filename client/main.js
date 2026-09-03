@@ -26,6 +26,8 @@ function setSelectedFile(file) {
   }
   if (file.size > MAX_UPLOAD_BYTES) {
     selectedFile = null;
+    fileInput.value = "";
+    dropzoneText.textContent = "Arrastra una imagen o video aquí, o haz clic para elegir";
     uploadBtn.disabled = true;
     out.textContent = "El archivo no puede superar los 60 MB.";
     return;

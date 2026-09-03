@@ -40,9 +40,11 @@ function durationInSeconds(output) {
 
 async function getVideoDuration(inputPath) {
   try {
-    await execFileAsync(ffmpegPath, ["-i", inputPath, "-f", "null", "-"], {
+    const { stdout, stderr } = await execFileAsync(ffmpegPath, ["-i", inputPath, "-f", "null", "-"], {
       windowsHide: true,
     });
+    const duration = durationInSeconds(`${stdout}\n${stderr}`);
+    if (duration && Number.isFinite(duration)) return duration;
   } catch (error) {
     const duration = durationInSeconds(`${error.stdout || ""}\n${error.stderr || ""}`);
     if (duration && Number.isFinite(duration)) return duration;
