@@ -12,6 +12,9 @@ const dropzoneText = document.querySelector("#dropzone-text");
 const progressWrap = document.querySelector("#progress-wrap");
 const progressBar = document.querySelector("#progress-bar");
 const progressLabel = document.querySelector("#progress-label");
+const MEBIBYTE = 1024 * 1024;
+const MAX_UPLOAD_BYTES = 60 * MEBIBYTE;
+const COMPRESSION_THRESHOLD_BYTES = 15 * MEBIBYTE;
 
 let selectedFile = null;
 
@@ -21,10 +24,19 @@ function setSelectedFile(file) {
     out.textContent = "Solo se permiten imágenes o videos.";
     return;
   }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    selectedFile = null;
+    uploadBtn.disabled = true;
+    out.textContent = "El archivo no puede superar los 60 MB.";
+    return;
+  }
   selectedFile = file;
   dropzoneText.textContent = `Seleccionado: ${file.name}`;
   uploadBtn.disabled = false;
-  out.textContent = "";
+  out.textContent =
+    file.type.startsWith("video/") && file.size > COMPRESSION_THRESHOLD_BYTES
+      ? "El video se comprimirá a un máximo de 10 MB antes de guardarse."
+      : "";
 }
 
 dropzone.addEventListener("click", () => fileInput.click());
@@ -118,7 +130,7 @@ uploadBtn.onclick = async () => {
   out.innerHTML = `
     <p id="view-link"><b>Link para ver:</b> <a target="_blank" href="${data.viewUrl}">${data.viewUrl}</a></p>
     <p><b>Eliminar archivo:</b> <button id="delete-image" type="button">Eliminar</button></p>
-    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. El límite es de 8 MB.</p>
+    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. El límite es de 60 MB. Los videos de más de 15 MB se comprimen a un máximo de 10 MB.</p>
   `;
 
   const deleteBtn = document.querySelector("#delete-image");
