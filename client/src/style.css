@@ -36,9 +36,10 @@ h1 {
 }
 
 #app {
-  max-width: 680px;
-  margin: 40px auto;
-  padding: 2rem;
+  width: 94vw;
+  margin: 24px auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
   text-align: center;
 }
 
@@ -99,6 +100,10 @@ button:focus-visible {
   border: 2px dashed #646cff;
   border-radius: 12px;
   padding: 2.5em 1em;
+  min-height: 70vh;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
