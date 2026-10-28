@@ -14,7 +14,7 @@ const progressBar = document.querySelector("#progress-bar");
 const progressLabel = document.querySelector("#progress-label");
 const MEBIBYTE = 1024 * 1024;
 const MAX_UPLOAD_BYTES = 60 * MEBIBYTE;
-const COMPRESSION_THRESHOLD_BYTES = 15 * MEBIBYTE;
+const MAX_VIDEO_BYTES = 13 * MEBIBYTE;
 
 let selectedFile = null;
 
@@ -24,21 +24,22 @@ function setSelectedFile(file) {
     out.textContent = "Solo se permiten imágenes o videos.";
     return;
   }
-  if (file.size > MAX_UPLOAD_BYTES) {
+  const isVideo = file.type.startsWith("video/");
+  const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_UPLOAD_BYTES;
+  if (file.size > maxBytes) {
     selectedFile = null;
     fileInput.value = "";
     dropzoneText.textContent = "Arrastra una imagen o video aquí, o haz clic para elegir";
     uploadBtn.disabled = true;
-    out.textContent = "El archivo no puede superar los 60 MB.";
+    out.textContent = isVideo
+      ? "El video no puede superar los 13 MB."
+      : "El archivo no puede superar los 60 MB.";
     return;
   }
   selectedFile = file;
   dropzoneText.textContent = `Seleccionado: ${file.name}`;
   uploadBtn.disabled = false;
-  out.textContent =
-    file.type.startsWith("video/") && file.size > COMPRESSION_THRESHOLD_BYTES
-      ? "El video se comprimirá a un máximo de 10 MB antes de guardarse."
-      : "";
+  out.textContent = "";
 }
 
 dropzone.addEventListener("click", () => fileInput.click());
@@ -132,7 +133,7 @@ uploadBtn.onclick = async () => {
   out.innerHTML = `
     <p id="view-link"><b>Link para ver:</b> <a target="_blank" href="${data.viewUrl}">${data.viewUrl}</a></p>
     <p><b>Eliminar archivo:</b> <button id="delete-image" type="button">Eliminar</button></p>
-    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. El límite es de 60 MB. Los videos de más de 15 MB se comprimen a un máximo de 10 MB.</p>
+    <p style="opacity:.7;font-size:13px">Solo existe 1 archivo activo. Si subes otro, se reemplaza. El límite es de 60 MB para imágenes y 13 MB para videos.</p>
   `;
 
   const deleteBtn = document.querySelector("#delete-image");
